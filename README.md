@@ -348,14 +348,17 @@ This utility is provided as-is for personal and commercial use.
 - **v1.1**: Added color output and space trimming
 - **v1.2**: Improved test suite and documentation
 - **v1.2.1**: Clarified hidden file handling with --hidden flag, updated tests and documentation
+- **v1.2.2**: Updated license information to MIT
 
 ## Release Notes
 
-### v1.2.1 (2024-06-20)
+### v1.2.2 (2024-06-20)
+- **License updated**: Project now uses MIT License
 - **Hidden file handling clarified:** When using the `--hidden` flag, hidden files (e.g., `.hidden.txt`) will preserve the leading dot and not convert it to an underscore. This is now the expected and tested behavior.
 - **Test suite and documentation updated:** The test suite and all documentation now reflect this correct behavior for hidden files.
 
 ---
 
 **Author**: David McDonald  
+**License**: MIT License  
 **Last Updated**: June 2025 
