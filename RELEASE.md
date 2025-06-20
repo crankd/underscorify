@@ -1,62 +1,20 @@
-# Release v1.2.9
+# Release v1.2.10
 
----
+# Release v1.2.9
 
 # Release v1.2.8
 
-## What's New
-
-- UUpdate release notes for v1.2.7
-
-## Installation
-
-Download the latest version and make it executable:
-
-```bash
-chmod +x underscorify.sh
-```
-
-## Usage
-
-```bash
-# Basic usage
-./underscorify.sh "filename with spaces.txt"
-
-# Process multiple files
-ls *.txt | ./underscorify.sh
-
-# Allow hidden files
-./underscorify.sh --hidden ".hidden file.txt"
-```
-
----
-
 # Release v1.2.7
 
-## What's New
+# Release v1.2.6
 
-- UUpdate release notes for v1.2.6
-
-## Installation
-
-Download the latest version and make it executable:
-
-```bash
-chmod +x underscorify.sh
-```
-
-## Usage
-
-```bash
-# Basic usage
-./underscorify.sh "filename with spaces.txt"
-
-# Process multiple files
-ls *.txt | ./underscorify.sh
-
-# Allow hidden files
-./underscorify.sh --hidden ".hidden file.txt"
-```
-
----
+# Release v1.2.3
+- Delete File Utilities.code-workspace
+- Delete debug.log
+- Update README.md
+- Require Bash 4.x, add conflict detection, hidden file handling, and comprehensive test suite
+- Add conflict detection, make ignore hidden default, require Bash, update docs and tests
+- Clean up test files and finalize merge with remote
+- Initial commit
+- Initial commit
 
