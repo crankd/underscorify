@@ -67,21 +67,17 @@ generate_github_release_notes() {
     local version="$1"
     local last_tag="$2"
     
-    cat << EOF
-# Release v$version
-
-## What's New
-
-EOF
+    echo "# Release v$version"
+    echo ""
     
     if [[ -n "$last_tag" ]]; then
-        # Get commits since last tag
+        # Get commits since last tag, excluding version bump commits
         git log --oneline --no-merges "${last_tag}..HEAD" | while read -r commit; do
             local hash=$(echo "$commit" | cut -d' ' -f1)
             local message=$(echo "$commit" | cut -d' ' -f2-)
             
-            # Skip version bump commits
-            if [[ "$message" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            # Skip version bump commits and release note update commits
+            if [[ "$message" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]] || [[ "$message" =~ ^Update\ release\ notes ]]; then
                 continue
             fi
             
@@ -91,30 +87,6 @@ EOF
     else
         echo "- Initial release"
     fi
-    
-    cat << EOF
-
-## Installation
-
-Download the latest version and make it executable:
-
-\`\`\`bash
-chmod +x underscorify.sh
-\`\`\`
-
-## Usage
-
-\`\`\`bash
-# Basic usage
-./underscorify.sh "filename with spaces.txt"
-
-# Process multiple files
-ls *.txt | ./underscorify.sh
-
-# Allow hidden files
-./underscorify.sh --hidden ".hidden file.txt"
-\`\`\`
-EOF
 }
 
 # Function to update RELEASE.md file
@@ -226,6 +198,56 @@ update_version_history() {
     mv "$temp_file" "$readme_file"
 }
 
+# Function to regenerate RELEASE.md for all tags
+generate_full_release_md() {
+    local release_file="RELEASE.md"
+    local temp_file=$(mktemp)
+    
+    # Get all tags, most recent first
+    local tags=( $(git tag --sort=-creatordate) )
+    
+    if [[ ${#tags[@]} -eq 0 ]]; then
+        # No tags, show all commits
+        echo "# Release (unversioned)" >> "$temp_file"
+        git log --oneline --no-merges | while read -r commit; do
+            local message=$(echo "$commit" | cut -d' ' -f2-)
+            if [[ "$message" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]] || [[ "$message" =~ ^Update\ release\ notes ]]; then
+                continue
+            fi
+            echo "- $message" >> "$temp_file"
+        done
+    else
+        for ((i=0; i<${#tags[@]}; i++)); do
+            local tag=${tags[$i]}
+            local prev_tag=""
+            if (( i+1 < ${#tags[@]} )); then
+                prev_tag=${tags[$((i+1))]}
+            fi
+            echo "# Release $tag" >> "$temp_file"
+            if [[ -n "$prev_tag" ]]; then
+                git log --oneline --no-merges "$prev_tag..$tag" | while read -r commit; do
+                    local message=$(echo "$commit" | cut -d' ' -f2-)
+                    if [[ "$message" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]] || [[ "$message" =~ ^Update\ release\ notes ]]; then
+                        continue
+                    fi
+                    echo "- $message" >> "$temp_file"
+                done
+            else
+                # First tag, show all up to this tag
+                git log --oneline --no-merges "$tag" | while read -r commit; do
+                    local message=$(echo "$commit" | cut -d' ' -f2-)
+                    if [[ "$message" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]] || [[ "$message" =~ ^Update\ release\ notes ]]; then
+                        continue
+                    fi
+                    echo "- $message" >> "$temp_file"
+                done
+            fi
+            echo "" >> "$temp_file"
+        done
+    fi
+    mv "$temp_file" "$release_file"
+}
+
 # Main script logic
 main() {
     local version="$1"
@@ -264,8 +286,8 @@ main() {
     local description="${commit_message:-"Release v$version"}"
     update_version_history "$version" "$description"
     
-    # Update RELEASE.md file
-    update_release_file "$version" "$last_tag"
+    # Regenerate RELEASE.md file for all tags
+    generate_full_release_md
     
     echo -e "${GREEN}Release notes updated for v$version${NC}"
     echo -e "${YELLOW}Don't forget to commit and push your changes!${NC}"
