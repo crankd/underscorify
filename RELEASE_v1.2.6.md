@@ -2,7 +2,6 @@
 
 ## What's New
 
-- UUpdate release notes for v1.2.5
 
 ## Installation
 
