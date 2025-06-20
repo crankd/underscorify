@@ -41,12 +41,13 @@ run_test() {
     esac
     
     # Remove any "renamed" or "would rename" messages for comparison
-    # Also remove color codes
-    actual_output=$(echo "$actual_output" | sed 's/\033\[[0-9;]*m//g' | sed 's/^renamed .* to //' | sed 's/^would rename .* to //')
+    # Also remove color codes - use perl for better ANSI escape sequence handling
+    actual_output=$(echo "$actual_output" | perl -pe 's/\033\[[0-9;]*m//g' | sed 's/^renamed .* to //' | sed 's/^would rename .* to //')
     # Remove carriage returns, tabs, and trim whitespace
     actual_output=$(echo "$actual_output" | tr -d '\r\t' | sed 's/^ *//;s/ *$//')
     expected_output=$(echo "$expected_output" | tr -d '\r\t' | sed 's/^ *//;s/ *$//')
     
+    # Byte-level comparison using hexdump for debugging
     if [ "$actual_output" = "$expected_output" ]; then
         echo -e "${GREEN}PASS${NC}"
         ((TESTS_PASSED++))
@@ -54,6 +55,8 @@ run_test() {
         echo -e "${RED}FAIL${NC}"
         echo "  Expected: '$expected_output'"
         echo "  Got:      '$actual_output'"
+        echo "  Expected (hex): $(echo -n "$expected_output" | hexdump -C | head -1)"
+        echo "  Got (hex):      $(echo -n "$actual_output" | hexdump -C | head -1)"
         ((TESTS_FAILED++))
     fi
 }
@@ -64,6 +67,7 @@ run_test_full() {
     local input="$2"
     local expected_output="$3"
     local test_type="$4"  # "string", "file", "stdin"
+    local additional_args="$5"  # Additional arguments for the test
     
     echo -n "Testing: $test_name... "
     
@@ -71,26 +75,27 @@ run_test_full() {
     
     case "$test_type" in
         "string")
-            actual_output=$(./underscorify.sh "$input")
+            actual_output=$(./underscorify.sh "$input" $additional_args)
             ;;
         "file")
             # Create a test file
             echo "test content" > "$input"
-            actual_output=$(./underscorify.sh "$input")
+            actual_output=$(./underscorify.sh "$input" $additional_args)
             # Clean up
             rm -f "$input" "$actual_output"
             ;;
         "stdin")
-            actual_output=$(echo "$input" | ./underscorify.sh)
+            actual_output=$(echo "$input" | ./underscorify.sh $additional_args)
             ;;
     esac
     
-    # Remove color codes for comparison
-    actual_output=$(echo "$actual_output" | sed 's/\033\[[0-9;]*m//g')
+    # Remove color codes for comparison - use perl for better ANSI escape sequence handling
+    actual_output=$(echo "$actual_output" | perl -pe 's/\033\[[0-9;]*m//g')
     # Remove carriage returns, tabs, and trim whitespace
     actual_output=$(echo "$actual_output" | tr -d '\r\t' | sed 's/^ *//;s/ *$//')
     expected_output=$(echo "$expected_output" | tr -d '\r\t' | sed 's/^ *//;s/ *$//')
     
+    # Byte-level comparison using hexdump for debugging
     if [ "$actual_output" = "$expected_output" ]; then
         echo -e "${GREEN}PASS${NC}"
         ((TESTS_PASSED++))
@@ -98,6 +103,8 @@ run_test_full() {
         echo -e "${RED}FAIL${NC}"
         echo "  Expected: '$expected_output'"
         echo "  Got:      '$actual_output'"
+        echo "  Expected (hex): $(echo -n "$expected_output" | hexdump -C | head -1)"
+        echo "  Got (hex):      $(echo -n "$actual_output" | hexdump -C | head -1)"
         ((TESTS_FAILED++))
     fi
 }
@@ -164,7 +171,7 @@ run_test "Mixed case string" "HelloWorld123" "HelloWorld123" "string"
 run_test "Empty string" "" "" "string"
 
 # Test 7: String with only special characters
-run_test "Only special characters" "!@#$%^&*()" "_" "string"
+run_test "Only special characters" "!@#$%^&*()" "" "string"
 
 # Test 8: String with numbers
 run_test "String with numbers" "file123name" "file123name" "string"
@@ -214,8 +221,8 @@ test_file_rename "No renaming when filename is clean" "cleanfile.txt" "cleanfile
 # Test 23: Complex filename with multiple special characters
 run_test "Complex filename" "My Company - Report (2024) v2.1.pdf" "My_Company_Report_2024_v2_1.pdf" "string"
 
-# Test 24: Filename with unicode characters (should be converted to underscores)
-run_test "Filename with unicode chars" "café résumé.pdf" "caf_r_sum_.pdf" "string"
+# Test 24: Filename with unicode characters (should be preserved)
+run_test "Filename with unicode chars" "café résumé.pdf" "café_résumé.pdf" "string"
 
 # Test 25: Very long filename
 run_test "Very long filename" "this_is_a_very_long_filename_with_many_characters_and_numbers_123456789.txt" "this_is_a_very_long_filename_with_many_characters_and_numbers_123456789.txt" "string"
@@ -234,6 +241,35 @@ run_test "Multiple consecutive underscores" "file___name.txt" "file_name.txt" "s
 
 # Test 30: Filename with backslashes (Windows path style)
 run_test "Filename with backslashes" "folder\file.txt" "folder_file.txt" "string"
+
+# Test: No trailing underscore before extension
+run_test "No trailing underscore before extension" "foo_.txt" "foo.txt" "string"
+run_test "No trailing underscore before extension (multiple)" "foo___.txt" "foo.txt" "string"
+run_test "No trailing underscore before extension (complex)" "foo__bar__baz__.txt" "foo_bar_baz.txt" "string"
+
+# Test: Hidden file with punctuation-only basename
+run_test "Hidden file with punctuation-only basename" ".()$.txt" ".txt" "string"
+
+# Test: Non-hidden file with punctuation-only basename  
+run_test "Non-hidden file with punctuation-only basename" "()$.txt" ".txt" "string"
+
+# Test: Hidden files are ignored by default (argument mode)
+run_test_full "Hidden file ignored by default (argument)" ".hidden file.txt" "skipped hidden file: .hidden file.txt" "string"
+
+# Test: Hidden files are ignored by default (stdin mode)
+run_test_full "Hidden file ignored by default (stdin)" ".hidden file.txt" "skipped hidden file: .hidden file.txt" "stdin"
+
+# Test: --hidden parameter allows renaming hidden files
+run_test_full "Hidden file with --hidden parameter" ".hidden file.txt" "would rename .hidden file.txt to .hidden_file.txt" "string" "--hidden"
+
+# Test: --hidden parameter with stdin
+run_test_full "Hidden file with --hidden parameter (stdin)" ".hidden file.txt" ".hidden_file.txt" "stdin" "--hidden"
+
+# Test: Mixed hidden and non-hidden files in stdin (default behavior)
+run_test_full "Mixed files - hidden ignored by default" ".hidden.txt\nnormal.txt" "skipped hidden file: .hidden.txt\nnormal.txt" "stdin"
+
+# Test: Mixed hidden and non-hidden files with --hidden parameter
+run_test_full "Mixed files - all processed with --hidden" ".hidden.txt\nnormal.txt" ".hidden.txt\nnormal.txt" "stdin" "--hidden"
 
 echo ""
 echo "=================================="

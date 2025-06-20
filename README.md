@@ -2,6 +2,9 @@
 
 A command-line utility that replaces non-alphanumeric characters with underscores while preserving file extensions. Perfect for cleaning up filenames and making them filesystem-friendly.
 
+**Now with full UTF-8 (Unicode) support!**
+- Unicode letters and numbers are preserved in cleaned filenames (e.g., `café résumé.pdf` → `café_résumé.pdf`).
+
 ## Features
 
 - **Smart filename processing**: Preserves file extensions while cleaning base names
@@ -10,6 +13,7 @@ A command-line utility that replaces non-alphanumeric characters with underscore
 - **Colored output**: Visual feedback with cyan for original and green for cleaned names
 - **File renaming**: Actually renames files when they exist
 - **Stdin support**: Process input from pipes and redirects
+- **UTF-8/Unicode support**: Unicode letters and numbers are preserved
 - **Comprehensive testing**: Full test suite with 30+ test cases
 
 ## Installation
@@ -36,7 +40,9 @@ A command-line utility that replaces non-alphanumeric characters with underscore
 
 ## Usage
 
-### Basic Usage
+**Note**: Examples assume you have installed the script in your PATH.
+
+### Basic Usage 
 
 ```bash
 # Process a single filename
@@ -77,33 +83,51 @@ cleaned_name=$(underscorify "original name.txt")
 echo "Cleaned: $cleaned_name"
 ```
 
+### New Usage
+
+```bash
+# Basic usage - process a single file or string
+underscorify "filename with spaces.txt"
+underscorify "string with special@chars#123"
+
+# Process multiple files from stdin
+ls *.txt | underscorify
+
+# Allow renaming of hidden files (use with caution)
+underscorify --hidden ".hidden file.txt"
+ls -a | underscorify --hidden
+
+# Process directory contents safely (hidden files ignored by default)
+ls -a | underscorify  # Hidden files will be skipped
+```
+
 ## Examples
 
 ### Input → Output
 
-| Input | Output |
-|-------|--------|
-| `"hello world"` | `"hello_world"` |
-| `"my file.txt"` | `"my_file.txt"` |
-| `"file@name#123.pdf"` | `"file_name_123.pdf"` |
-| `"hello---world"` | `"hello_world"` |
-| `"  spaced file.txt  "` | `"spaced_file.txt"` |
-| `"café résumé.pdf"` | `"caf_r_sum_.pdf"` |
-| `"20241230___HAS___MANY_____UNDERSCORES.pdf"` | `"20241230_HAS_MANY_UNDERSCORES.pdf"` |
+| Input | Output | Notes |
+|-------|--------|-------|
+| `"hello world"` | `"hello_world"` | No file extension |
+| `"my file.txt"` | `"my_file.txt"` | Retains file extension |
+| `file@name#123.pdf` | `file_name_123.pdf` | Removes symbols, punctuation, spaces, and control characters |
+| `hello---world` | `hello_world` | Dashes replaced with underscores |
+| `"  spaced file.txt  "` | `"spaced_file.txt"` | Leading and trailing spaces removed |
+| `"café résumé.pdf"` | `"café_résumé.pdf"` | Unicode letters and numbers preserved |
+| `"HAS___MANY_____UNDERSCORES.pdf"` | `"HAS_MANY_UNDERSCORES.pdf"` | Many consecutive underscores collapsed |
 
 ### Real-world Example
 
 ```bash
 # Before
-ls -la
--rw-r--r--  1 user  staff  368742 Dec 30 05:38 20241230___HAS___MANY_____UNDERSCORES.pdf
+ls
+HAS___MANY_____UNDERSCORES.pdf
 
 # Run underscorify
-underscorify "20241230___HAS___MANY_____UNDERSCORES.pdf"
+underscorify HAS___MANY_____UNDERSCORES.pdf
 
 # After
-ls -la
--rw-r--r--  1 user  staff  368742 Dec 30 05:38 20241230_HAS_MANY_UNDERSCORES.pdf
+ls
+HAS_MANY_UNDERSCORES.pdf
 ```
 
 ## Rules
@@ -112,10 +136,50 @@ The script follows these processing rules:
 
 1. **Accept file name or file path as argument**
 2. **Replace all non-alphanumeric characters** in the base name with underscores
-3. **Replace MANY consecutive underscores** with single underscores
+3. **Replace multiple consecutive underscores** with single underscores
 4. **Rename file** using the cleaned base name (when file exists)
 5. **Preserve file extensions** (everything after the last dot)
 6. **Trim leading/trailing spaces** from input
+7. **Skip hidden files by default** (files starting with `.`) - use `--hidden` to allow renaming
+
+## Command Line Options
+
+- `--hidden`: Allow renaming of hidden files (files starting with `.`)
+  - **Warning**: Use with caution as hidden files often contain important system configuration
+  - By default, hidden files are skipped to prevent accidental damage
+
+## How the Script Determines What to Keep vs. Replace
+
+The script uses Unicode property classes to intelligently distinguish between characters to preserve and characters to replace:
+
+### **Unicode Property Classes Used:**
+- `\p{L}` = **Unicode Letter** (includes all letters from all scripts: Latin, Cyrillic, Arabic, Chinese, etc.)
+- `\p{N}` = **Unicode Number** (includes all numeric characters from all scripts)
+
+### **What Gets Kept:**
+- **Letters**: `a-z`, `A-Z`, `é`, `ñ`, `α`, `β`, `中`, `日`, `ア`, `א`, etc.
+- **Numbers**: `0-9`, `١`, `٢`, `٣`, `一`, `二`, `三`, etc.
+
+### **What Gets Replaced with Underscores:**
+- **Symbols**: `@`, `#`, `$`, `%`, `^`, `&`, `*`, `(`, `)`, `-`, `+`, `=`, etc.
+- **Punctuation**: `.`, `,`, `!`, `?`, `;`, `:`, etc.
+- **Whitespace**: spaces, tabs, newlines
+- **Control characters**: non-printable characters
+
+### **Examples:**
+```bash
+"café@resume#2024.pdf" → "café_resume_2024.pdf"
+# é (letter) kept, @ and # (symbols) replaced
+
+"file@name.txt" → "file_name.txt"  
+# @ (symbol) replaced
+
+"résumé.pdf" → "résumé.pdf"
+# é (letter) kept, no changes needed
+
+"document_2024.pdf" → "document_2024.pdf"
+# All characters are letters/numbers, no changes needed
+```
 
 ## Testing
 
