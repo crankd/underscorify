@@ -1,11 +1,5 @@
 # Underscorify
 
-## Release Notes
-
-### v1.2.0 (2024-06-20)
-- **Hidden file handling clarified:** When using the `--hidden` flag, hidden files (e.g., `.hidden.txt`) will preserve the leading dot and not convert it to an underscore. This is now the expected and tested behavior.
-- **Test suite and documentation updated:** The test suite and all documentation now reflect this correct behavior for hidden files.
-
 A command-line utility that replaces non-alphanumeric characters with underscores while preserving file extensions. Perfect for cleaning up filenames and making them filesystem-friendly.
 
 **Now with full UTF-8 (Unicode) support!**
@@ -353,6 +347,13 @@ This utility is provided as-is for personal and commercial use.
 - **v1.0**: Initial release with core functionality
 - **v1.1**: Added color output and space trimming
 - **v1.2**: Improved test suite and documentation
+- **v1.2.1**: Clarified hidden file handling with --hidden flag, updated tests and documentation
+
+## Release Notes
+
+### v1.2.1 (2024-06-20)
+- **Hidden file handling clarified:** When using the `--hidden` flag, hidden files (e.g., `.hidden.txt`) will preserve the leading dot and not convert it to an underscore. This is now the expected and tested behavior.
+- **Test suite and documentation updated:** The test suite and all documentation now reflect this correct behavior for hidden files.
 
 ---
 
