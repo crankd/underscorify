@@ -385,6 +385,7 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 - **v1.1**: Added color output and space trimming
 - **v1.2**: Improved test suite and documentation
 - **v1.2.1**: Clarified hidden file handling with --hidden flag, updated tests and documentation
+- **v1.2.13**: v1.2.13: Remove release notes from README.md, use RELEASE.md only
 - **v1.2.12**: v1.2.12: Test pre-push hook with meaningful commit parsing
 - **v1.2.11**: Test release with meaningful commit parsing
 - **v1.2.10**: v1.2.10: Regenerate RELEASE.md with correct, non-repetitive content
