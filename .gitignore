@@ -1,2 +1,4 @@
 .DS_Store
-filelist.txt
+*.log
+*.txt
+*.code-workspace

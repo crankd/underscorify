@@ -346,10 +346,12 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 - **v1.2**: Improved test suite and documentation
 - **v1.2.1**: Clarified hidden file handling with --hidden flag, updated tests and documentation
 - **v1.2.2**: Updated license information to MIT
+- **v1.2.3**: Updated .gitignore to ignore .log, .txt, and .code-workspace files
 
 ## Release Notes
 
-### v1.2.2 (2025-06-20)
+### v1.2.3 (2024-06-20)
+- **Git ignore updated**: Added patterns to ignore .log, .txt, and .code-workspace files
 - **License updated**: Project now uses MIT License
 - **Hidden file handling clarified:** When using the `--hidden` flag, hidden files (e.g., `.hidden.txt`) will preserve the leading dot and not convert it to an underscore. This is now the expected and tested behavior.
 - **Test suite and documentation updated:** The test suite and all documentation now reflect this correct behavior for hidden files.
