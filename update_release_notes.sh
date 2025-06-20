@@ -202,16 +202,14 @@ update_release_file() {
 generate_full_release_md() {
     local release_file="RELEASE.md"
     local temp_file=$(mktemp)
-    
-    # Get all tags, most recent first
-    local tags=( $(git tag --sort=-creatordate) )
-    
+
+    # Get all tags and sort by version number (descending)
+    local tags=( $(git tag | sort -V -r) )
+
     if [[ ${#tags[@]} -eq 0 ]]; then
-        # No tags, show all commits
         echo "# Release (unversioned)" >> "$temp_file"
         git log --oneline --no-merges | while read -r commit; do
             local message=$(echo "$commit" | cut -d' ' -f2-)
-            # Only skip the repetitive "Update release notes" commits
             if [[ "$message" =~ ^Update\ release\ notes ]]; then
                 continue
             fi
@@ -224,28 +222,42 @@ generate_full_release_md() {
             if (( i+1 < ${#tags[@]} )); then
                 prev_tag=${tags[$((i+1))]}
             fi
-            echo "# Release $tag" >> "$temp_file"
+
+            local version=${tag#v}
+            echo "# Release v$version" >> "$temp_file"
+
+            local release_notes=""
+
             if [[ -n "$prev_tag" ]]; then
-                git log --oneline --no-merges "$prev_tag..$tag" | while read -r commit; do
+                release_notes=$(git log --oneline --no-merges "$prev_tag..$tag" | while read -r commit; do
                     local message=$(echo "$commit" | cut -d' ' -f2-)
-                    # Only skip the repetitive "Update release notes" commits
-                    # Keep version commits as they contain meaningful release descriptions
-                    if [[ "$message" =~ ^Update\ release\ notes ]]; then
+                    if [[ "$message" =~ ^Update\ release\ notes ]] || [[ "$message" =~ ^v$version[:\-] ]]; then
                         continue
                     fi
-                    echo "- $message" >> "$temp_file"
-                done
+                    local clean_message=$(echo "$message" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+[:\-]?\s*//')
+                    if [[ -n "$clean_message" && "$clean_message" =~ [a-zA-Z0-9] ]]; then
+                        echo "- $clean_message"
+                    fi
+                done)
             else
-                # First tag, show all up to this tag
-                git log --oneline --no-merges "$tag" | while read -r commit; do
+                release_notes=$(git log --oneline --no-merges "$tag" | while read -r commit; do
                     local message=$(echo "$commit" | cut -d' ' -f2-)
-                    # Only skip the repetitive "Update release notes" commits
-                    if [[ "$message" =~ ^Update\ release\ notes ]]; then
+                    if [[ "$message" =~ ^Update\ release\ notes ]] || [[ "$message" =~ ^v$version[:\-] ]]; then
                         continue
                     fi
-                    echo "- $message" >> "$temp_file"
-                done
+                    local clean_message=$(echo "$message" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+[:\-]?\s*//')
+                    if [[ -n "$clean_message" && "$clean_message" =~ [a-zA-Z0-9] ]]; then
+                        echo "- $clean_message"
+                    fi
+                done)
             fi
+
+            if [[ -z "$release_notes" ]]; then
+                echo "- No significant changes in this release." >> "$temp_file"
+            else
+                echo "$release_notes" >> "$temp_file"
+            fi
+
             echo "" >> "$temp_file"
         done
     fi
