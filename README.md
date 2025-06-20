@@ -385,6 +385,7 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 - **v1.1**: Added color output and space trimming
 - **v1.2**: Improved test suite and documentation
 - **v1.2.1**: Clarified hidden file handling with --hidden flag, updated tests and documentation
+- **v1.2.8**: v1.2.8: Optimize release workflow to prioritize automatic version detection
 - **v1.2.7**: v1.2.7: Implement improved release notes system with single RELEASE.md file
 - **v1.2.6**: Update release notes for v1.2.6
 - **v1.2.6**: v1.2.6: Fix GitHub release notes generation
@@ -411,6 +412,10 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 - **Bug fixes**: Various improvements to edge case handling
 
 ### v1.2.1 (2024-06-20)
+
+### v1.2.8 (2025-06-20)
+- **UUpdate release notes for v1.2.7**
+
 
 ### v1.2.7 (2025-06-20)
 - **UUpdate release notes for v1.2.6**
