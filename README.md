@@ -399,72 +399,10 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 
 ## Release Notes
 
-### v1.0 (Initial Release)
-- **Core functionality**: Replace non-alphanumeric characters with underscores while preserving file extensions
-- **Basic file operations**: Rename files when they exist, show "would rename" when they don't
-- **Unicode support**: Preserve Unicode letters and numbers in cleaned filenames
-- **Space trimming**: Automatically remove leading and trailing spaces
-
-### v1.1 (2024-06-20)
-- **Color output**: Added visual feedback with cyan for original and green for cleaned names
-- **Space trimming**: Enhanced space trimming functionality
-- **Improved user experience**: Better visual feedback for file operations
-
-### v1.2 (2024-06-20)
-- **Comprehensive test suite**: Added 30+ test cases covering all functionality
-- **Documentation improvements**: Enhanced README with detailed usage examples
-- **Bug fixes**: Various improvements to edge case handling
-
-### v1.2.1 (2024-06-20)
-
-### v1.2.12 (2025-06-20)
-
-
-### v1.2.11 (2025-06-20)
-- **UImprove performance: optimize regex matching for large file sets**
-- **UFix bug: handle edge case with empty filenames**
-- **UAdd new feature: support for batch processing multiple directories**
-- **UUpdate release notes for v1.2.10**
-
-
-### v1.2.10 (2025-06-20)
-- **UUpdate release notes for v1.2.9**
-
-
-### v1.2.9 (2025-06-20)
-- **UUpdate release notes for v1.2.8**
-
-
-### v1.2.8 (2025-06-20)
-- **UUpdate release notes for v1.2.7**
-
-
-### v1.2.7 (2025-06-20)
-- **UUpdate release notes for v1.2.6**
-
-
-### v1.2.6 (2025-06-20)
-
-
-### v1.2.6 (2025-06-20)
-- **UUpdate release notes for v1.2.5**
-
-
-### v1.2.5 (2025-06-20)
-
-- **Hidden file handling clarified**: When using the `--hidden` flag, hidden files (e.g., `.hidden.txt`) will preserve the leading dot and not convert it to an underscore
-- **Test suite and documentation updated**: All tests and documentation now reflect the correct behavior for hidden files
-- **Bash version requirements**: Added comprehensive documentation for Bash 4.x+ requirement
-
-### v1.2.2 (2024-06-20)
-- **License updated**: Project now uses MIT License
-- **Documentation consistency**: Updated all references to reflect MIT licensing
-
-### v1.2.3 (2024-06-20)
-- **Git ignore updated**: Added patterns to ignore .log, .txt, and .code-workspace files
+See [Release Notes](./RELEASE.md).
 
 ---
 
 **Author**: David McDonald  
 **License**: MIT License  
-**Last Updated**: June 2025 
+**Last Updated**: June 2025

@@ -121,45 +121,45 @@ update_release_file() {
 }
 
 # Function to update README with new release notes
-update_readme() {
-    local version="$1"
-    local release_notes="$2"
-    local readme_file="README.md"
-    
-    # Create temporary file
-    local temp_file=$(mktemp)
-    
-    # Find the Release Notes section and add new version
-    local in_release_notes=false
-    local added_new_version=false
-    
-    while IFS= read -r line; do
-        echo "$line" >> "$temp_file"
-        
-        # Check if we're entering Release Notes section
-        if [[ "$line" == "## Release Notes" ]]; then
-            in_release_notes=true
-            continue
-        fi
-        
-        # If we're in Release Notes and find the first version, add our new version before it
-        if [[ "$in_release_notes" == true && "$line" =~ ^###\ v[0-9]+\.[0-9]+\.[0-9]+ && "$added_new_version" == false ]]; then
-            echo "" >> "$temp_file"
-            echo "$release_notes" >> "$temp_file"
-            echo "" >> "$temp_file"
-            added_new_version=true
-        fi
-    done < "$readme_file"
-    
-    # If we didn't add the version (no existing versions), add it at the end of Release Notes
-    if [[ "$added_new_version" == false && "$in_release_notes" == true ]]; then
-        echo "" >> "$temp_file"
-        echo "$release_notes" >> "$temp_file"
-    fi
-    
-    # Replace original file
-    mv "$temp_file" "$readme_file"
-}
+# update_readme() {
+#     local version="$1"
+#     local release_notes="$2"
+#     local readme_file="README.md"
+#     
+#     # Create temporary file
+#     local temp_file=$(mktemp)
+#     
+#     # Find the Release Notes section and add new version
+#     local in_release_notes=false
+#     local added_new_version=false
+#     
+#     while IFS= read -r line; do
+#         echo "$line" >> "$temp_file"
+#         
+#         # Check if we're entering Release Notes section
+#         if [[ "$line" == "## Release Notes" ]]; then
+#             in_release_notes=true
+#             continue
+#         fi
+#         
+#         # If we're in Release Notes and find the first version, add our new version before it
+#         if [[ "$in_release_notes" == true && "$line" =~ ^###\ v[0-9]+\.[0-9]+\.[0-9]+ && "$added_new_version" == false ]]; then
+#             echo "" >> "$temp_file"
+#             echo "$release_notes" >> "$temp_file"
+#             echo "" >> "$temp_file"
+#             added_new_version=true
+#         fi
+#     done < "$readme_file"
+#     
+#     # If we didn't add the version (no existing versions), add it at the end of Release Notes
+#     if [[ "$added_new_version" == false && "$in_release_notes" == true ]]; then
+#         echo "" >> "$temp_file"
+#         echo "$release_notes" >> "$temp_file"
+#     fi
+#     
+#     # Replace original file
+#     mv "$temp_file" "$readme_file"
+# }
 
 # Function to update Version History
 update_version_history() {
@@ -279,8 +279,8 @@ main() {
     # Generate release notes
     local release_notes=$(generate_release_notes "$version" "$last_tag")
     
-    # Update README
-    update_readme "$version" "$release_notes"
+    # Update README - REMOVED: No longer updating README with release notes
+    # update_readme "$version" "$release_notes"
     
     # Update Version History with description from commit message
     local description="${commit_message:-"Release v$version"}"
