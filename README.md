@@ -16,6 +16,46 @@ A command-line utility that replaces non-alphanumeric characters with underscore
 - **Hidden file protection**: Safely handles hidden files with configurable behavior
 - **Test mode**: Special mode for testing the underscorify function without file operations
 
+## Automated Release Workflow
+
+The project includes an automated release system that creates release notes and git tags when you push commits with version numbers.
+
+### Preferred Workflow (Option 1 - Automatic)
+
+```bash
+# Make your changes
+git add .
+git commit -m "v1.2.8: Add new feature"
+git push
+```
+
+**What happens automatically:**
+- ✅ Detects version `v1.2.8` in commit message
+- ✅ Creates git tag `v1.2.8`
+- ✅ Updates `RELEASE.md` with new release notes
+- ✅ Updates `README.md` version history
+- ✅ Commits all release note changes
+- ✅ Pushes everything to remote
+
+### Alternative Workflow (Option 2 - Interactive)
+
+```bash
+# Make your changes
+git add .
+git commit -m "Add new feature"
+git push  # Will prompt for version if needed
+```
+
+### GitHub Release Creation
+
+After pushing, copy the top section of `RELEASE.md` (before the `---`) to create a GitHub release:
+
+1. Go to your GitHub repository
+2. Click "Releases" → "Create a new release"
+3. Select the tag (e.g., `v1.2.8`)
+4. Copy content from `RELEASE.md` to the release notes field
+5. Publish the release
+
 ## Installation
 
 ### Prerequisites
