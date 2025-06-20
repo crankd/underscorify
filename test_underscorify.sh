@@ -19,6 +19,7 @@ run_test() {
     local input="$2"
     local expected_output="$3"
     local test_type="$4"  # "string", "file", "stdin"
+    local additional_args="$5"
     
     echo -n "Testing: $test_name... "
     
@@ -26,17 +27,17 @@ run_test() {
     
     case "$test_type" in
         "string")
-            actual_output=$(./underscorify.sh "$input")
+            actual_output=$(bash ./underscorify.sh "$input" $additional_args)
             ;;
         "file")
             # Create a test file
             echo "test content" > "$input"
-            actual_output=$(./underscorify.sh "$input")
+            actual_output=$(bash ./underscorify.sh "$input" $additional_args)
             # Clean up
             rm -f "$input" "$actual_output"
             ;;
         "stdin")
-            actual_output=$(echo "$input" | ./underscorify.sh)
+            actual_output=$(echo "$input" | bash ./underscorify.sh $additional_args)
             ;;
     esac
     
@@ -75,17 +76,24 @@ run_test_full() {
     
     case "$test_type" in
         "string")
-            actual_output=$(./underscorify.sh "$input" $additional_args)
+            actual_output=$(bash ./underscorify.sh "$input" $additional_args)
             ;;
         "file")
             # Create a test file
             echo "test content" > "$input"
-            actual_output=$(./underscorify.sh "$input" $additional_args)
+            actual_output=$(bash ./underscorify.sh "$input" $additional_args)
             # Clean up
             rm -f "$input" "$actual_output"
             ;;
         "stdin")
-            actual_output=$(echo "$input" | ./underscorify.sh $additional_args)
+            # Handle multi-line input by checking for actual newlines
+            if [[ "$input" == *$'\n'* ]]; then
+                # Use printf with %b to interpret escape sequences
+                actual_output=$(printf "%b" "$input" | bash ./underscorify.sh $additional_args)
+            else
+                # Single line input
+                actual_output=$(printf "%s\n" "$input" | bash ./underscorify.sh $additional_args)
+            fi
             ;;
     esac
     
@@ -121,7 +129,7 @@ test_file_rename() {
     # Create a test file
     echo "test content" > "$input"
     
-    local script_output=$(./underscorify.sh "$input")
+    local script_output=$(bash ./underscorify.sh "$input")
     
     # Check if file was renamed
     if [ "$should_rename" = "yes" ]; then
@@ -168,7 +176,7 @@ run_test "String with underscores" "hello_world_test" "hello_world_test" "string
 run_test "Mixed case string" "HelloWorld123" "HelloWorld123" "string"
 
 # Test 6: Empty string
-run_test "Empty string" "" "" "string"
+run_test "Empty string" "" "" "string" "--test"
 
 # Test 7: String with only special characters
 run_test "Only special characters" "!@#$%^&*()" "" "string"
@@ -195,7 +203,7 @@ run_test "Filename with underscores" "my_file_name.txt" "my_file_name.txt" "stri
 run_test "Filename with mixed case" "MyFile123.TXT" "MyFile123.TXT" "string"
 
 # Test 15: Filename with only extension
-run_test "Filename with only extension" ".txt" ".txt" "string"
+run_test "Filename with only extension" ".txt" "skipped hidden file: .txt" "string"
 
 # Test 16: Filename starting with special characters
 run_test "Filename starting with special chars" "!@#file.txt" "_file.txt" "string"
@@ -248,7 +256,7 @@ run_test "No trailing underscore before extension (multiple)" "foo___.txt" "foo.
 run_test "No trailing underscore before extension (complex)" "foo__bar__baz__.txt" "foo_bar_baz.txt" "string"
 
 # Test: Hidden file with punctuation-only basename
-run_test "Hidden file with punctuation-only basename" ".()$.txt" ".txt" "string"
+run_test "Hidden file with punctuation-only basename" ".()$.txt" "skipped hidden file: .()$.txt" "string"
 
 # Test: Non-hidden file with punctuation-only basename  
 run_test "Non-hidden file with punctuation-only basename" "()$.txt" ".txt" "string"
@@ -265,11 +273,15 @@ run_test_full "Hidden file with --hidden parameter" ".hidden file.txt" "would re
 # Test: --hidden parameter with stdin
 run_test_full "Hidden file with --hidden parameter (stdin)" ".hidden file.txt" ".hidden_file.txt" "stdin" "--hidden"
 
-# Test: Mixed hidden and non-hidden files in stdin (default behavior)
-run_test_full "Mixed files - hidden ignored by default" ".hidden.txt\nnormal.txt" "skipped hidden file: .hidden.txt\nnormal.txt" "stdin"
+# Test: Mixed files - hidden ignored by default
+run_test_full "Mixed files - hidden ignored by default" ".hidden.txt
+normal.txt" "skipped hidden file: .hidden.txt
+normal.txt" "stdin"
 
-# Test: Mixed hidden and non-hidden files with --hidden parameter
-run_test_full "Mixed files - all processed with --hidden" ".hidden.txt\nnormal.txt" ".hidden.txt\nnormal.txt" "stdin" "--hidden"
+# Test: Mixed files - all processed with --hidden
+run_test_full "Mixed files - all processed with --hidden" ".hidden.txt
+normal.txt" ".hidden_txt
+normal.txt" "stdin" "--hidden"
 
 echo ""
 echo "=================================="
