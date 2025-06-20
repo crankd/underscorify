@@ -345,6 +345,7 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 - **v1.1**: Added color output and space trimming
 - **v1.2**: Improved test suite and documentation
 - **v1.2.1**: Clarified hidden file handling with --hidden flag, updated tests and documentation
+- **v1.2.5**: v1.2.5: Test automated release notes system
 - **v1.2.2**: Updated license information to MIT
 - **v1.2.3**: Updated .gitignore to ignore .log, .txt, and .code-workspace files
 
@@ -367,6 +368,9 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 - **Bug fixes**: Various improvements to edge case handling
 
 ### v1.2.1 (2024-06-20)
+
+### v1.2.5 (2025-06-20)
+
 - **Hidden file handling clarified**: When using the `--hidden` flag, hidden files (e.g., `.hidden.txt`) will preserve the leading dot and not convert it to an underscore
 - **Test suite and documentation updated**: All tests and documentation now reflect the correct behavior for hidden files
 - **Bash version requirements**: Added comprehensive documentation for Bash 4.x+ requirement
