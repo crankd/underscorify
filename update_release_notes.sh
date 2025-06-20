@@ -22,6 +22,20 @@ extract_version() {
     fi
 }
 
+# Function to get last tag
+get_last_tag() {
+    git describe --tags --abbrev=0 2>/dev/null || echo ""
+}
+
+# Function to create git tag
+create_git_tag() {
+    local version="$1"
+    
+    echo -e "${CYAN}Creating git tag v$version...${NC}"
+    git tag "v$version"
+    echo -e "${GREEN}Git tag v$version created${NC}"
+}
+
 # Function to generate release notes from git commits
 generate_release_notes() {
     local version="$1"
@@ -46,6 +60,92 @@ generate_release_notes() {
     else
         echo "- **Initial release**"
     fi
+}
+
+# Function to generate GitHub release notes
+generate_github_release_notes() {
+    local version="$1"
+    local last_tag="$2"
+    
+    cat << EOF
+# Release v$version
+
+## What's New
+
+EOF
+    
+    if [[ -n "$last_tag" ]]; then
+        # Get commits since last tag
+        git log --oneline --no-merges "${last_tag}..HEAD" | while read -r commit; do
+            local hash=$(echo "$commit" | cut -d' ' -f1)
+            local message=$(echo "$commit" | cut -d' ' -f2-)
+            
+            # Skip version bump commits
+            if [[ "$message" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+                continue
+            fi
+            
+            # Convert commit message to bullet point
+            echo "- $(echo "$message" | sed 's/^./\U&/')"
+        done
+    else
+        echo "- Initial release"
+    fi
+    
+    cat << EOF
+
+## Installation
+
+Download the latest version and make it executable:
+
+\`\`\`bash
+chmod +x underscorify.sh
+\`\`\`
+
+## Usage
+
+\`\`\`bash
+# Basic usage
+./underscorify.sh "filename with spaces.txt"
+
+# Process multiple files
+ls *.txt | ./underscorify.sh
+
+# Allow hidden files
+./underscorify.sh --hidden ".hidden file.txt"
+\`\`\`
+EOF
+}
+
+# Function to update RELEASE.md file
+update_release_file() {
+    local version="$1"
+    local last_tag="$2"
+    local release_file="RELEASE.md"
+    
+    echo -e "${CYAN}Updating $release_file for v$version...${NC}"
+    
+    # Generate new release notes
+    local new_release_notes=$(generate_github_release_notes "$version" "$last_tag")
+    
+    # Create temporary file
+    local temp_file=$(mktemp)
+    
+    # Add new release notes at the top
+    echo "$new_release_notes" > "$temp_file"
+    echo "" >> "$temp_file"
+    echo "---" >> "$temp_file"
+    echo "" >> "$temp_file"
+    
+    # Add existing content if file exists
+    if [[ -f "$release_file" ]]; then
+        cat "$release_file" >> "$temp_file"
+    fi
+    
+    # Replace original file
+    mv "$temp_file" "$release_file"
+    
+    echo -e "${GREEN}Updated $release_file with v$version release notes${NC}"
 }
 
 # Function to update README with new release notes
@@ -130,10 +230,11 @@ update_version_history() {
 main() {
     local version="$1"
     local commit_message="$2"
+    local create_tag="${3:-true}"
     
     if [[ -z "$version" ]]; then
         echo -e "${RED}Error: Version number required${NC}"
-        echo "Usage: $0 <version> [commit_message]"
+        echo "Usage: $0 <version> [commit_message] [create_tag]"
         exit 1
     fi
     
@@ -146,7 +247,12 @@ main() {
     echo -e "${CYAN}Updating release notes for v$version...${NC}"
     
     # Get last tag
-    local last_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+    local last_tag=$(get_last_tag)
+    
+    # Create git tag if requested
+    if [[ "$create_tag" == "true" ]]; then
+        create_git_tag "$version"
+    fi
     
     # Generate release notes
     local release_notes=$(generate_release_notes "$version" "$last_tag")
@@ -157,6 +263,9 @@ main() {
     # Update Version History with description from commit message
     local description="${commit_message:-"Release v$version"}"
     update_version_history "$version" "$description"
+    
+    # Update RELEASE.md file
+    update_release_file "$version" "$last_tag"
     
     echo -e "${GREEN}Release notes updated for v$version${NC}"
     echo -e "${YELLOW}Don't forget to commit and push your changes!${NC}"
