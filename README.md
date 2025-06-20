@@ -1,6 +1,6 @@
 # Underscorify
 
-A command-line utility that replaces non-alphanumeric characters with underscores while preserving file extensions. Perfect for cleaning up filenames and making them Mac/Linux filesystem-friendly.
+A command-line utility for Mac and Linux that replaces non-alphanumeric characters in file names with underscores. Perfect for cleaning up filenames and making them Mac/Linux filesystem-friendly.
 
 ## Features
 
@@ -33,7 +33,6 @@ git push
 - ✅ Detects version `v1.2.8` in commit message
 - ✅ Creates git tag `v1.2.8`
 - ✅ Updates `RELEASE.md` with new release notes
-- ✅ Updates `README.md` version history
 - ✅ Commits all release note changes
 - ✅ Pushes everything to remote
 
