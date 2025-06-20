@@ -1,3 +1,6 @@
+# Release v1.2.16
+- v1.2.16: Fix RELEASE.md generation to properly parse and include all commit messages
+
 # Release v1.2.15
 
 # Release v1.2.14
