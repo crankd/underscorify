@@ -1,9 +1,6 @@
 # Underscorify
 
-A command-line utility that replaces non-alphanumeric characters with underscores while preserving file extensions. Perfect for cleaning up filenames and making them filesystem-friendly.
-
-**Now with full UTF-8 (Unicode) support!**
-- Unicode letters and numbers are preserved in cleaned filenames (e.g., `café résumé.pdf` → `café_résumé.pdf`).
+A command-line utility that replaces non-alphanumeric characters with underscores while preserving file extensions. Perfect for cleaning up filenames and making them Mac/Linux filesystem-friendly.
 
 ## Features
 
@@ -25,7 +22,7 @@ A command-line utility that replaces non-alphanumeric characters with underscore
 - **Bash 4.x or higher** (required for associative arrays used in conflict detection)
 - `sed`, `tr`, and `perl` utilities (usually pre-installed)
 
-**Important**: The script uses `#!/usr/local/bin/bash` in its shebang line, which means it expects Bash 4.x+ to be installed in `/usr/local/bin/bash`. This is typically the case when using Homebrew on macOS, but may not be true on all systems.
+**Important**: The script uses `#!/usr/local/bin/bash` in its shebang line, which means it expects Bash 4.x+ to be installed in `/usr/local/bin/bash`. This is typically the case when using Homebrew on macOS, but may not be true on all systems. See [Bash Version Requirements](#bash-version-requirements) below.
 
 ### Setup
 
@@ -47,7 +44,7 @@ A command-line utility that replaces non-alphanumeric characters with underscore
 
 The script requires Bash 4.x or higher for associative array support. If you encounter this error:
 
-```
+```bash
 Error: This script requires Bash 4.x or higher (current version: 3.2.57(1)-release)
 Associative arrays are required for conflict detection.
 ```
@@ -340,7 +337,7 @@ echo "test input" | underscorify 2> debug.log
 
 ## License
 
-This utility is provided as-is for personal and commercial use.
+This utility is provided as-is for personal and commercial use. See [MIT License](./LICENSE).
 
 ## Version History
 
@@ -352,7 +349,7 @@ This utility is provided as-is for personal and commercial use.
 
 ## Release Notes
 
-### v1.2.2 (2024-06-20)
+### v1.2.2 (2025-06-20)
 - **License updated**: Project now uses MIT License
 - **Hidden file handling clarified:** When using the `--hidden` flag, hidden files (e.g., `.hidden.txt`) will preserve the leading dot and not convert it to an underscore. This is now the expected and tested behavior.
 - **Test suite and documentation updated:** The test suite and all documentation now reflect this correct behavior for hidden files.
