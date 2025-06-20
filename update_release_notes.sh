@@ -162,41 +162,41 @@ update_release_file() {
 # }
 
 # Function to update Version History
-update_version_history() {
-    local version="$1"
-    local description="$2"
-    local readme_file="README.md"
-    
-    # Create temporary file
-    local temp_file=$(mktemp)
-    
-    local in_version_history=false
-    local added_new_version=false
-    
-    while IFS= read -r line; do
-        echo "$line" >> "$temp_file"
-        
-        # Check if we're entering Version History section
-        if [[ "$line" == "## Version History" ]]; then
-            in_version_history=true
-            continue
-        fi
-        
-        # If we're in Version History and find the first version, add our new version before it
-        if [[ "$in_version_history" == true && "$line" =~ ^-\ \*\*v[0-9]+\.[0-9]+\.[0-9]+\*\* && "$added_new_version" == false ]]; then
-            echo "- **v$version**: $description" >> "$temp_file"
-            added_new_version=true
-        fi
-    done < "$readme_file"
-    
-    # If we didn't add the version (no existing versions), add it at the end of Version History
-    if [[ "$added_new_version" == false && "$in_version_history" == true ]]; then
-        echo "- **v$version**: $description" >> "$temp_file"
-    fi
-    
-    # Replace original file
-    mv "$temp_file" "$readme_file"
-}
+# update_version_history() {
+#     local version="$1"
+#     local description="$2"
+#     local readme_file="README.md"
+#     
+#     # Create temporary file
+#     local temp_file=$(mktemp)
+#     
+#     local in_version_history=false
+#     local added_new_version=false
+#     
+#     while IFS= read -r line; do
+#         echo "$line" >> "$temp_file"
+#         
+#         # Check if we're entering Version History section
+#         if [[ "$line" == "## Version History" ]]; then
+#             in_version_history=true
+#             continue
+#         fi
+#         
+#         # If we're in Version History and find the first version, add our new version before it
+#         if [[ "$in_version_history" == true && "$line" =~ ^-\ \*\*v[0-9]+\.[0-9]+\.[0-9]+\*\* && "$added_new_version" == false ]]; then
+#             echo "- **v$version**: $description" >> "$temp_file"
+#             added_new_version=true
+#         fi
+#     done < "$readme_file"
+#     
+#     # If we didn't add the version (no existing versions), add it at the end of Version History
+#     if [[ "$added_new_version" == false && "$in_version_history" == true ]]; then
+#         echo "- **v$version**: $description" >> "$temp_file"
+#     fi
+#     
+#     # Replace original file
+#     mv "$temp_file" "$readme_file"
+# }
 
 # Function to regenerate RELEASE.md for all tags
 generate_full_release_md() {
@@ -282,9 +282,9 @@ main() {
     # Update README - REMOVED: No longer updating README with release notes
     # update_readme "$version" "$release_notes"
     
-    # Update Version History with description from commit message
-    local description="${commit_message:-"Release v$version"}"
-    update_version_history "$version" "$description"
+    # Update Version History - REMOVED: No longer updating README with version history
+    # local description="${commit_message:-"Release v$version"}"
+    # update_version_history "$version" "$description"
     
     # Regenerate RELEASE.md file for all tags
     generate_full_release_md

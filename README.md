@@ -379,25 +379,6 @@ echo "test input" | underscorify 2> debug.log
 
 This utility is provided as-is for personal and commercial use. See [MIT License](./LICENSE).
 
-## Version History
-
-- **v1.0**: Initial release with core functionality
-- **v1.1**: Added color output and space trimming
-- **v1.2**: Improved test suite and documentation
-- **v1.2.1**: Clarified hidden file handling with --hidden flag, updated tests and documentation
-- **v1.2.13**: v1.2.13: Remove release notes from README.md, use RELEASE.md only
-- **v1.2.12**: v1.2.12: Test pre-push hook with meaningful commit parsing
-- **v1.2.11**: Test release with meaningful commit parsing
-- **v1.2.10**: v1.2.10: Regenerate RELEASE.md with correct, non-repetitive content
-- **v1.2.9**: v1.2.9: Fix release notes generation to create clean, meaningful content
-- **v1.2.8**: v1.2.8: Optimize release workflow to prioritize automatic version detection
-- **v1.2.7**: v1.2.7: Implement improved release notes system with single RELEASE.md file
-- **v1.2.6**: Update release notes for v1.2.6
-- **v1.2.6**: v1.2.6: Fix GitHub release notes generation
-- **v1.2.5**: v1.2.5: Test automated release notes system
-- **v1.2.2**: Updated license information to MIT
-- **v1.2.3**: Updated .gitignore to ignore .log, .txt, and .code-workspace files
-
 ## Release Notes
 
 See [Release Notes](./RELEASE.md).
