@@ -345,6 +345,7 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 - **v1.1**: Added color output and space trimming
 - **v1.2**: Improved test suite and documentation
 - **v1.2.1**: Clarified hidden file handling with --hidden flag, updated tests and documentation
+- **v1.2.6**: v1.2.6: Fix GitHub release notes generation
 - **v1.2.5**: v1.2.5: Test automated release notes system
 - **v1.2.2**: Updated license information to MIT
 - **v1.2.3**: Updated .gitignore to ignore .log, .txt, and .code-workspace files
@@ -368,6 +369,10 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 - **Bug fixes**: Various improvements to edge case handling
 
 ### v1.2.1 (2024-06-20)
+
+### v1.2.6 (2025-06-20)
+- **UUpdate release notes for v1.2.5**
+
 
 ### v1.2.5 (2025-06-20)
 
