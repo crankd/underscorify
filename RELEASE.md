@@ -1,3 +1,5 @@
+# Release v1.2.12
+
 # Release v1.2.11
 - Improve performance: optimize regex matching for large file sets
 - Fix bug: handle edge case with empty filenames

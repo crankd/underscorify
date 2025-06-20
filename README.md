@@ -385,6 +385,7 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 - **v1.1**: Added color output and space trimming
 - **v1.2**: Improved test suite and documentation
 - **v1.2.1**: Clarified hidden file handling with --hidden flag, updated tests and documentation
+- **v1.2.12**: v1.2.12: Test pre-push hook with meaningful commit parsing
 - **v1.2.11**: Test release with meaningful commit parsing
 - **v1.2.10**: v1.2.10: Regenerate RELEASE.md with correct, non-repetitive content
 - **v1.2.9**: v1.2.9: Fix release notes generation to create clean, meaningful content
@@ -415,6 +416,9 @@ This utility is provided as-is for personal and commercial use. See [MIT License
 - **Bug fixes**: Various improvements to edge case handling
 
 ### v1.2.1 (2024-06-20)
+
+### v1.2.12 (2025-06-20)
+
 
 ### v1.2.11 (2025-06-20)
 - **UImprove performance: optimize regex matching for large file sets**
