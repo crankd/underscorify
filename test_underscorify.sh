@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/local/bin/bash
 
 # Test suite for underscorify script
 # Run with: bash test_underscorify.sh
@@ -280,7 +280,7 @@ normal.txt" "stdin"
 
 # Test: Mixed files - all processed with --hidden
 run_test_full "Mixed files - all processed with --hidden" ".hidden.txt
-normal.txt" ".hidden_txt
+normal.txt" ".hidden.txt
 normal.txt" "stdin" "--hidden"
 
 echo ""

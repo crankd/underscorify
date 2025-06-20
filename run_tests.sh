@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/local/bin/bash
 
 # Simple test runner for underscorify script
 # Run from the bin directory: bash run_tests.sh

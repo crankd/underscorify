@@ -96,6 +96,7 @@ The `underscorify` script should:
 5. **Handle file renaming** when the input is a filename that exists
 6. **Process stdin** when no arguments are provided
 7. **Show appropriate messages** for file operations
+8. **Preserve the leading dot for hidden files** when using the `--hidden` flag (e.g., `.hidden.txt` remains `.hidden.txt`, not `_hidden.txt`)
 
 ## Example Transformations
 
@@ -105,7 +106,8 @@ The `underscorify` script should:
 | `"my file.txt"` | `"my_file.txt"` |
 | `"file@name#123.pdf"` | `"file_name_123.pdf"` |
 | `"hello---world"` | `"hello_world"` |
-| `"café résumé.pdf"` | `"caf_r_sum_.pdf"` |
+| `"café résumé.pdf"` | `"café_résumé.pdf"` |
+| `.hidden.txt` (with `--hidden`) | `.hidden.txt` |
 
 ## Troubleshooting
 
@@ -113,5 +115,8 @@ If tests fail:
 
 1. Ensure the `underscorify` script is executable: `chmod +x underscorify`
 2. Check that the script path in tests is correct (`./underscorify`)
-3. Verify the script has proper shebang (`#!/bin/bash`)
-4. Run tests from the correct directory (`~/bin`) 
+3. Verify the script has proper shebang (`#!/usr/local/bin/bash`)
+   - **Note**: The script uses `/usr/local/bin/bash` (Homebrew bash) instead of `/bin/bash` (system bash) because it requires Bash 4.x+ for associative arrays used in conflict detection
+   - **See README.md "Bash Version Requirements" section** for detailed information about bash version requirements and troubleshooting
+4. Run tests from the correct directory (`~/bin`)
+5. If you are testing hidden files with the `--hidden` flag, remember that the script will preserve the leading dot (e.g., `.hidden.txt` stays `.hidden.txt`). The test suite expects this behavior. 

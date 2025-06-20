@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/local/bin/bash
 
 # Ensure running with Bash 4.x or higher (required for associative arrays)
 if [ -z "$BASH_VERSION" ]; then

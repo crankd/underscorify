@@ -1,5 +1,11 @@
 # Underscorify
 
+## Release Notes
+
+### v1.2.0 (2024-06-20)
+- **Hidden file handling clarified:** When using the `--hidden` flag, hidden files (e.g., `.hidden.txt`) will preserve the leading dot and not convert it to an underscore. This is now the expected and tested behavior.
+- **Test suite and documentation updated:** The test suite and all documentation now reflect this correct behavior for hidden files.
+
 A command-line utility that replaces non-alphanumeric characters with underscores while preserving file extensions. Perfect for cleaning up filenames and making them filesystem-friendly.
 
 **Now with full UTF-8 (Unicode) support!**
@@ -15,12 +21,17 @@ A command-line utility that replaces non-alphanumeric characters with underscore
 - **Stdin support**: Process input from pipes and redirects
 - **UTF-8/Unicode support**: Unicode letters and numbers are preserved
 - **Comprehensive testing**: Full test suite with 30+ test cases
+- **Conflict detection**: Prevents naming conflicts when processing multiple files
+- **Hidden file protection**: Safely handles hidden files with configurable behavior
+- **Test mode**: Special mode for testing the underscorify function without file operations
 
 ## Installation
 
 ### Prerequisites
-- macOS/Linux with bash shell
-- `sed` and `tr` utilities (usually pre-installed)
+- **Bash 4.x or higher** (required for associative arrays used in conflict detection)
+- `sed`, `tr`, and `perl` utilities (usually pre-installed)
+
+**Important**: The script uses `#!/usr/local/bin/bash` in its shebang line, which means it expects Bash 4.x+ to be installed in `/usr/local/bin/bash`. This is typically the case when using Homebrew on macOS, but may not be true on all systems.
 
 ### Setup
 
@@ -37,6 +48,46 @@ A command-line utility that replaces non-alphanumeric characters with underscore
    # Or create a symlink in ~/bin
    ln -s /path/to/underscorify-project/underscorify.sh ~/bin/underscorify
    ```
+
+### Bash Version Requirements
+
+The script requires Bash 4.x or higher for associative array support. If you encounter this error:
+
+```
+Error: This script requires Bash 4.x or higher (current version: 3.2.57(1)-release)
+Associative arrays are required for conflict detection.
+```
+
+**Solutions:**
+
+1. **Install/Update Bash via Homebrew** (macOS):
+   ```bash
+   brew install bash
+   # or if already installed:
+   brew upgrade bash
+   ```
+
+2. **Update the shebang line** if your Bash 4.x+ is installed elsewhere:
+   ```bash
+   # Find your bash location
+   which bash
+   
+   # Edit the script to use your bash location
+   sed -i 's|#!/usr/local/bin/bash|#!/path/to/your/bash|' underscorify.sh
+   ```
+
+3. **Use a different shebang** for better portability:
+   ```bash
+   # Replace the first line with:
+   #!/usr/bin/env bash
+   ```
+
+4. **Run with explicit bash** (temporary solution):
+   ```bash
+   bash underscorify.sh "filename.txt"
+   ```
+
+**Note**: The script is configured to use `/usr/local/bin/bash` by default, which is the standard location for Homebrew-installed bash on macOS. If you're on a different system or have bash installed elsewhere, you may need to adjust the shebang line.
 
 ## Usage
 
@@ -83,7 +134,7 @@ cleaned_name=$(underscorify "original name.txt")
 echo "Cleaned: $cleaned_name"
 ```
 
-### New Usage
+### Command Line Options
 
 ```bash
 # Basic usage - process a single file or string
@@ -99,6 +150,9 @@ ls -a | underscorify --hidden
 
 # Process directory contents safely (hidden files ignored by default)
 ls -a | underscorify  # Hidden files will be skipped
+
+# Test mode - only process the string without file operations
+underscorify --test "test string with spaces"
 ```
 
 ## Examples
@@ -114,6 +168,8 @@ ls -a | underscorify  # Hidden files will be skipped
 | `"  spaced file.txt  "` | `"spaced_file.txt"` | Leading and trailing spaces removed |
 | `"café résumé.pdf"` | `"café_résumé.pdf"` | Unicode letters and numbers preserved |
 | `"HAS___MANY_____UNDERSCORES.pdf"` | `"HAS_MANY_UNDERSCORES.pdf"` | Many consecutive underscores collapsed |
+| `".hidden file.txt"` | `"skipped hidden file: .hidden file.txt"` | Hidden files skipped by default |
+| `".hidden file.txt"` | `".hidden_file.txt"` | Hidden files processed with `--hidden` flag |
 
 ### Real-world Example
 
@@ -130,6 +186,20 @@ ls
 HAS_MANY_UNDERSCORES.pdf
 ```
 
+### Conflict Detection Example
+
+```bash
+# Create files that would conflict
+touch "file@name.txt"
+touch "file#name.txt"
+
+# Process both - conflict detected
+echo -e "file@name.txt\nfile#name.txt" | underscorify
+# Output: 
+# file_name.txt
+# CONFLICT: 'file#name.txt' and 'file@name.txt' would both become 'file_name.txt'
+```
+
 ## Rules
 
 The script follows these processing rules:
@@ -141,12 +211,34 @@ The script follows these processing rules:
 5. **Preserve file extensions** (everything after the last dot)
 6. **Trim leading/trailing spaces** from input
 7. **Skip hidden files by default** (files starting with `.`) - use `--hidden` to allow renaming
+8. **Detect naming conflicts** when processing multiple files from stdin
+9. **Require Bash 4.x or higher** for associative array support
 
 ## Command Line Options
 
 - `--hidden`: Allow renaming of hidden files (files starting with `.`)
   - **Warning**: Use with caution as hidden files often contain important system configuration
   - By default, hidden files are skipped to prevent accidental damage
+- `--test`: Test mode - only process the string without performing file operations
+  - Useful for testing the underscorify function in isolation
+  - Outputs only the cleaned string, no file operations or colored output
+
+## Conflict Detection
+
+When processing multiple files from stdin, the script detects potential naming conflicts:
+
+- **Conflict detection**: If multiple input files would result in the same cleaned filename, a conflict warning is displayed
+- **Associative arrays**: Uses Bash 4.x associative arrays to track processed names efficiently
+- **Conflict resolution**: The first file with a given cleaned name is processed, subsequent conflicts are reported
+
+Example:
+```bash
+echo -e "file@name.txt\nfile#name.txt\nfile\$name.txt" | underscorify
+# Output:
+# file_name.txt
+# CONFLICT: 'file#name.txt' and 'file@name.txt' would both become 'file_name.txt'
+# CONFLICT: 'file$name.txt' and 'file@name.txt' would both become 'file_name.txt'
+```
 
 ## How the Script Determines What to Keep vs. Replace
 
@@ -198,67 +290,51 @@ bash test_underscorify.sh
 The test suite includes 30+ test cases covering:
 
 - **String processing** (no file extension)
-- **Filename processing** (with extensions)
-- **File operations** (renaming, would-rename scenarios)
-- **Stdin processing**
-- **Edge cases** (unicode, very long names, special characters)
-- **Color output handling**
+- **File processing** (with extensions)
+- **Stdin processing** (pipes and redirects)
+- **Hidden file handling** (with and without `--hidden` flag)
+- **Conflict detection** (multiple files with same cleaned name)
+- **Unicode support** (international characters)
+- **Edge cases** (empty strings, special characters only)
+- **Test mode** (`--test` flag functionality)
 
-### Test Results
+### Debug Mode
+
+The script includes debug logging for troubleshooting:
 
 ```bash
-==================================
-Test Results:
-Tests Passed: 19
-Tests Failed: 11
-Total Tests: 30
-All tests passed!
+# Debug output is written to debug.log when processing stdin
+echo "test input" | underscorify 2> debug.log
 ```
 
-*Note: Some tests may show as "failed" due to invisible character differences, but the script functionality is correct.*
+## Requirements
 
-## Project Structure
-
-```
-underscorify-project/
-├── underscorify.sh          # Main script
-├── test_underscorify.sh     # Test suite
-├── run_tests.sh             # Test runner
-├── TEST_README.md           # Test documentation
-└── README.md               # This file
-```
+- **Bash 4.x or higher**: Required for associative arrays used in conflict detection
+- **Perl**: Used for Unicode-aware string processing
+- **Standard Unix utilities**: `sed`, `tr`, `mv`
 
 ## Troubleshooting
 
 ### Common Issues
 
-**Permission denied:**
-```bash
-chmod +x underscorify.sh
-```
+1. **"Error: This script requires Bash 4.x or higher"**
+   - **Most Common Cause**: The script is trying to use the old system bash instead of a newer version
+   - **Solution**: Install/update bash via Homebrew: `brew install bash` or `brew upgrade bash`
+   - **Alternative**: Update the shebang line to point to your bash 4.x+ location
+   - **Check your bash version**: `bash --version`
+   - **See "Bash Version Requirements" section above for detailed solutions**
 
-**Command not found:**
-```bash
-# Add to PATH or use full path
-./underscorify.sh "filename.txt"
-```
+2. **Hidden files not being processed**
+   - Solution: Use the `--hidden` flag to allow processing of hidden files
+   - Example: `underscorify --hidden ".hidden file.txt"`
 
-**Colors not showing:**
-- The script uses ANSI color codes
-- Some terminals may not support colors
-- Colors are optional and don't affect functionality
+3. **Naming conflicts when processing multiple files**
+   - The script will detect and report conflicts
+   - Manually resolve conflicts by renaming files before processing
 
-### Debug Mode
-
-To see what the script is doing internally:
-
-```bash
-# Test with a simple case
-echo "test file.txt" | ./underscorify.sh
-
-# Check the actual output
-./underscorify.sh "test file.txt" | hexdump -C
-```
+4. **Unicode characters not preserved**
+   - Ensure your terminal supports UTF-8
+   - The script uses Perl with Unicode support for proper character handling
 
 ## Contributing
 
